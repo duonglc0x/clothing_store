@@ -6,25 +6,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * DTO: Đơn hàng
+ * OrderDTO – Data Transfer Object cho Đơn hàng.
+ *
+ * Chứa thông tin đơn hàng đã flatten: tên khách hàng, tên nhân viên
+ * (thay vì embed entity), trạng thái dạng String, và danh sách chi tiết đơn.
  */
 public class OrderDTO {
 
-    private Integer id;
-    private String customerName;
-    private Integer customerId;
-    private String employeeName;
-    private Integer employeeId;
-    private LocalDateTime orderDate;
-    private BigDecimal totalAmount;
-    private BigDecimal discount;
-    private String status;
-    private String note;
+    private Integer id;                  // ID đơn hàng
+    private String customerName;         // Tên khách hàng – flatten từ Customer
+    private Integer customerId;          // ID khách hàng – dùng khi cập nhật
+    private String employeeName;         // Tên nhân viên xử lý – flatten từ Employee
+    private Integer employeeId;          // ID nhân viên
+    private LocalDateTime orderDate;     // Ngày giờ đặt hàng
+    private BigDecimal totalAmount;      // Tổng tiền trước giảm giá
+    private BigDecimal discount;         // Số tiền giảm giá
+    private String status;               // Trạng thái dạng String (VD: "PENDING")
+    private String note;                 // Ghi chú đơn hàng
+
+    /** Danh sách chi tiết đơn hàng – dùng để hiển thị/tạo đơn hàng mới */
     private List<OrderDetailDTO> details = new ArrayList<>();
 
+    /** Constructor mặc định */
     public OrderDTO() {}
 
-    // ── Getters & Setters ─────────────────────────────────────────────────────
+    // ── Getters & Setters ──
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -58,7 +64,11 @@ public class OrderDTO {
     public List<OrderDetailDTO> getDetails() { return details; }
     public void setDetails(List<OrderDetailDTO> details) { this.details = details; }
 
-    // Tính tổng thành tiền sau giảm giá
+    /**
+     * Tính tổng thành tiền sau giảm giá.
+     * Công thức: finalAmount = totalAmount - discount
+     * @return thành tiền cuối cùng (BigDecimal), trả về ZERO nếu totalAmount null
+     */
     public BigDecimal getFinalAmount() {
         if (totalAmount == null) return BigDecimal.ZERO;
         BigDecimal disc = discount != null ? discount : BigDecimal.ZERO;

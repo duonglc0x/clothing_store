@@ -16,12 +16,18 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * EmployeePanel – Quản lý nhân viên.
+ * EmployeePanel – Panel quản lý nhân viên (CRUD).
+ *
+ * Cấu trúc tương tự CustomerPanel nhưng có thêm:
+ * - Cột Lương: hiển thị định dạng tiền VNĐ (NumberFormat)
+ * - Cột Ngày vào: hiển thị định dạng dd/MM/yyyy (DateTimeFormatter)
+ * - Cả 2 trường trên cần parse khi sửa
  */
 public class EmployeePanel extends JPanel {
 
+    // ── Hằng số màu ──
     private static final Color BG_COLOR      = new Color(240, 240, 240);
-    private static final Color HEADER_COLOR  = new Color(103, 58, 183);
+    private static final Color HEADER_COLOR  = new Color(103, 58, 183);   // Tím (phân biệt với panel khác)
     private static final Color BTN_ADD       = new Color(52, 168, 83);
     private static final Color BTN_EDIT      = new Color(251, 188, 4);
     private static final Color BTN_DELETE    = new Color(234, 67, 53);
@@ -29,6 +35,8 @@ public class EmployeePanel extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private final EmployeeController controller = new EmployeeController();
+
+    /** Định dạng ngày dd/MM/yyyy cho hiển thị và parse */
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public EmployeePanel() {
@@ -37,8 +45,11 @@ public class EmployeePanel extends JPanel {
         initComponents();
     }
 
+    /**
+     * Khởi tạo component: header, toolbar, table 7 cột, event listeners.
+     */
     private void initComponents() {
-        // ═══════════════ HEADER ═══════════════
+        // ═══════════════ HEADER + TOOLBAR ═══════════════
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(BG_COLOR);
         headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 10, 20));
@@ -73,11 +84,12 @@ public class EmployeePanel extends JPanel {
         table = new JTable(tableModel);
         table.setRowHeight(35);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        table.setSelectionBackground(new Color(220, 210, 240));
+        table.setSelectionBackground(new Color(220, 210, 240));  // Tím nhạt khi chọn
         table.setSelectionForeground(Color.BLACK);
         table.setGridColor(new Color(220, 220, 220));
         table.setShowGrid(true);
 
+        // Custom renderer cho header
         JTableHeader tableHeader = table.getTableHeader();
         tableHeader.setPreferredSize(new Dimension(0, 40));
         tableHeader.setReorderingAllowed(false);
@@ -96,6 +108,7 @@ public class EmployeePanel extends JPanel {
             }
         });
 
+        // Căn giữa cột ID và thiết lập chiều rộng cột
         DefaultTableCellRenderer centerR = new DefaultTableCellRenderer();
         centerR.setHorizontalAlignment(SwingConstants.CENTER);
         table.getColumnModel().getColumn(0).setCellRenderer(centerR);
@@ -133,6 +146,9 @@ public class EmployeePanel extends JPanel {
         return button;
     }
 
+    /**
+     * Tải dữ liệu nhân viên. Lương được format theo locale VN, ngày theo dd/MM/yyyy.
+     */
     public void loadData() {
         SwingWorker<List<Employee>, Void> worker = new SwingWorker<>() {
             @Override
@@ -145,6 +161,7 @@ public class EmployeePanel extends JPanel {
                 try {
                     List<Employee> list = get();
                     tableModel.setRowCount(0);
+                    // NumberFormat locale VN: 12000000 → "12.000.000"
                     NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
                     for (Employee e : list) {
                         tableModel.addRow(new Object[]{
@@ -153,7 +170,9 @@ public class EmployeePanel extends JPanel {
                             e.getPhone(),
                             e.getEmail(),
                             e.getPosition(),
+                            // Format lương: "12.000.000 đ" hoặc "" nếu null
                             e.getSalary() != null ? nf.format(e.getSalary()) + " đ" : "",
+                            // Format ngày: "01/03/2024" hoặc "" nếu null
                             e.getHireDate() != null ? e.getHireDate().format(DF) : ""
                         });
                     }
@@ -165,12 +184,17 @@ public class EmployeePanel extends JPanel {
         worker.execute();
     }
 
+    /**
+     * Dialog thêm nhân viên mới.
+     * Parse lương (BigDecimal) và ngày (LocalDate) từ text field.
+     */
     private void showAddDialog() {
         JPanel panel = createFormPanel(null);
         int result = JOptionPane.showConfirmDialog(this, panel, "Thêm nhân viên",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
             try {
+                // Lấy giá trị từ form – mỗi component là một JPanel chứa [Label, TextField]
                 JTextField tfName     = (JTextField) ((JPanel) panel.getComponent(0)).getComponent(1);
                 JTextField tfPhone    = (JTextField) ((JPanel) panel.getComponent(1)).getComponent(1);
                 JTextField tfEmail    = (JTextField) ((JPanel) panel.getComponent(2)).getComponent(1);
@@ -184,8 +208,10 @@ public class EmployeePanel extends JPanel {
                     return;
                 }
 
+                // Parse lương: rỗng → ZERO, ngược lại → BigDecimal
                 BigDecimal salary = tfSalary.getText().trim().isEmpty()
                     ? BigDecimal.ZERO : new BigDecimal(tfSalary.getText().trim());
+                // Parse ngày: rỗng → null, ngược lại → LocalDate
                 LocalDate hireDate = tfHireDate.getText().trim().isEmpty()
                     ? null : LocalDate.parse(tfHireDate.getText().trim(), DF);
 
@@ -200,6 +226,9 @@ public class EmployeePanel extends JPanel {
         }
     }
 
+    /**
+     * Dialog sửa nhân viên. Loại bỏ ký tự format (đ, dấu chấm) trước khi điền vào form.
+     */
     private void showEditDialog() {
         int row = table.getSelectedRow();
         if (row < 0) {
@@ -208,11 +237,13 @@ public class EmployeePanel extends JPanel {
         }
         int id = (int) tableModel.getValueAt(row, 0);
 
+        // Điền giá trị hiện tại, loại bỏ ký tự format lương
         JPanel panel = createFormPanel(new String[]{
             safe(tableModel.getValueAt(row, 1)),
             safe(tableModel.getValueAt(row, 2)),
             safe(tableModel.getValueAt(row, 3)),
             safe(tableModel.getValueAt(row, 4)),
+            // Loại bỏ " đ", ".", "," từ chuỗi lương để có số thuần
             safe(tableModel.getValueAt(row, 5)).replace(" đ", "").replace(".", "").replace(",", ""),
             safe(tableModel.getValueAt(row, 6))
         });
@@ -244,6 +275,7 @@ public class EmployeePanel extends JPanel {
         }
     }
 
+    /** Xóa nhân viên đang chọn sau khi xác nhận */
     private void deleteSelected() {
         int row = table.getSelectedRow();
         if (row < 0) {
@@ -263,6 +295,10 @@ public class EmployeePanel extends JPanel {
         }
     }
 
+    /**
+     * Tạo form panel 6 trường nhập liệu cho nhân viên.
+     * @param values giá trị ban đầu [hoTen, sdt, email, chucVu, luong, ngayVao], null nếu thêm mới
+     */
     private JPanel createFormPanel(String[] values) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -285,6 +321,7 @@ public class EmployeePanel extends JPanel {
         return panel;
     }
 
+    /** Tạo dòng trường nhập liệu: [Label | Field] */
     private JPanel createFieldRow(String label, JComponent field) {
         JPanel row = new JPanel(new BorderLayout(10, 5));
         row.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -296,6 +333,7 @@ public class EmployeePanel extends JPanel {
         return row;
     }
 
+    /** Chuyển Object thành String an toàn (null → "") */
     private String safe(Object val) {
         return val != null ? val.toString() : "";
     }

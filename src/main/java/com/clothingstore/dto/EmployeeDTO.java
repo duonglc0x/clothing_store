@@ -4,20 +4,32 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * DTO: Nhân viên
+ * EmployeeDTO – Data Transfer Object cho Nhân viên.
+ *
+ * Chứa thông tin nhân viên cần hiển thị trên View:
+ * họ tên, SĐT, email, chức vụ, lương, ngày vào làm.
  */
 public class EmployeeDTO {
 
     private Integer id;
-    private String fullName;
-    private String phone;
-    private String email;
-    private String position;
-    private BigDecimal salary;
-    private LocalDate hireDate;
+    private String fullName;    // Họ tên nhân viên
+    private String phone;       // Số điện thoại
+    private String email;       // Email
+    private String position;    // Chức vụ (VD: "Nhân viên bán hàng")
+    private BigDecimal salary;  // Mức lương (BigDecimal cho chính xác tiền tệ)
+    private LocalDate hireDate; // Ngày vào làm
 
+    /** Constructor mặc định */
     public EmployeeDTO() {}
 
+    /**
+     * Constructor có tham số cơ bản.
+     * @param id       ID nhân viên
+     * @param fullName họ tên
+     * @param phone    SĐT
+     * @param email    email
+     * @param position chức vụ
+     */
     public EmployeeDTO(Integer id, String fullName, String phone, String email, String position) {
         this.id = id;
         this.fullName = fullName;
@@ -48,6 +60,7 @@ public class EmployeeDTO {
     public LocalDate getHireDate() { return hireDate; }
     public void setHireDate(LocalDate hireDate) { this.hireDate = hireDate; }
 
+    /** Trả về họ tên nhân viên */
     @Override
     public String toString() { return fullName; }
 }

@@ -6,14 +6,30 @@ import org.hibernate.Session;
 
 import java.util.List;
 
+/**
+ * ProductDAO – DAO cho entity Product (Sản phẩm).
+ *
+ * Kế thừa CRUD từ GenericDAO, bổ sung:
+ * - findAllWithDetails(): tải sản phẩm kèm Category và Supplier (JOIN FETCH)
+ * - searchByName(): tìm kiếm theo tên sản phẩm
+ */
 public class ProductDAO extends GenericDAO<Product> {
 
+    /** Constructor – truyền Product.class cho GenericDAO */
     public ProductDAO() {
         super(Product.class);
     }
 
     /**
-     * Lấy tất cả sản phẩm kèm theo Category và Supplier (JOIN FETCH).
+     * Lấy tất cả sản phẩm kèm theo Category và Supplier.
+     *
+     * Sử dụng LEFT JOIN FETCH để tải eager (tải sẵn) các quan hệ Lazy,
+     * tránh lỗi LazyInitializationException khi truy cập category/supplier
+     * sau khi Session đã đóng.
+     *
+     * SELECT DISTINCT p – loại bỏ bản ghi trùng lặp do JOIN.
+     *
+     * @return danh sách sản phẩm với đầy đủ thông tin category và supplier
      */
     public List<Product> findAllWithDetails() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -26,7 +42,10 @@ public class ProductDAO extends GenericDAO<Product> {
     }
 
     /**
-     * Tìm sản phẩm theo tên (LIKE).
+     * Tìm kiếm sản phẩm theo tên (LIKE – tìm gần đúng).
+     *
+     * @param keyword từ khóa tìm kiếm
+     * @return danh sách sản phẩm có tên chứa keyword
      */
     public List<Product> searchByName(String keyword) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {

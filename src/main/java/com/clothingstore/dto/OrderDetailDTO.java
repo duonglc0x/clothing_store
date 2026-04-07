@@ -3,21 +3,35 @@ package com.clothingstore.dto;
 import java.math.BigDecimal;
 
 /**
- * DTO: Chi tiết đơn hàng
+ * OrderDetailDTO – Data Transfer Object cho Chi tiết đơn hàng.
+ *
+ * Chứa thông tin một dòng sản phẩm trong đơn hàng:
+ * sản phẩm nào, size/color, số lượng, đơn giá, thành tiền.
+ * Bao gồm productName (flatten từ Product entity) để hiển thị trực tiếp.
  */
 public class OrderDetailDTO {
 
-    private Integer id;
-    private Integer productId;
-    private String productName;
-    private String size;
-    private String color;
-    private Integer quantity;
-    private BigDecimal unitPrice;
-    private BigDecimal subtotal;
+    private Integer id;           // ID chi tiết đơn hàng
+    private Integer productId;    // ID sản phẩm
+    private String productName;   // Tên sản phẩm – flatten từ Product
+    private String size;          // Kích cỡ
+    private String color;         // Màu sắc
+    private Integer quantity;     // Số lượng mua
+    private BigDecimal unitPrice; // Đơn giá tại thời điểm mua
+    private BigDecimal subtotal;  // Thành tiền = unitPrice × quantity
 
+    /** Constructor mặc định */
     public OrderDetailDTO() {}
 
+    /**
+     * Constructor có tham số. Tự động tính subtotal = unitPrice × quantity.
+     * @param productId   ID sản phẩm
+     * @param productName tên sản phẩm
+     * @param size        kích cỡ
+     * @param color       màu sắc
+     * @param quantity    số lượng
+     * @param unitPrice   đơn giá
+     */
     public OrderDetailDTO(Integer productId, String productName, String size, String color,
                           int quantity, BigDecimal unitPrice) {
         this.productId = productId;
@@ -26,10 +40,11 @@ public class OrderDetailDTO {
         this.color = color;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
+        // Tự động tính thành tiền khi khởi tạo
         this.subtotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
-    // ── Getters & Setters ─────────────────────────────────────────────────────
+    // ── Getters & Setters ──
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -51,6 +66,7 @@ public class OrderDetailDTO {
     public BigDecimal getUnitPrice() { return unitPrice; }
     public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
 
+    /** @return thành tiền = đơn giá × số lượng */
     public BigDecimal getSubtotal() { return subtotal; }
     public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
 }

@@ -1,19 +1,29 @@
 package com.clothingstore.dto;
 
 /**
- * DTO: Nhà cung cấp
+ * SupplierDTO – Data Transfer Object cho Nhà cung cấp.
+ *
+ * Chứa thông tin nhà cung cấp cần hiển thị trên View.
  */
 public class SupplierDTO {
 
-    private Integer id;
-    private String name;
-    private String phone;
-    private String email;
-    private String address;
-    private String contactName;
+    private Integer id;          // ID nhà cung cấp
+    private String name;         // Tên nhà cung cấp
+    private String phone;        // Số điện thoại
+    private String email;        // Email
+    private String address;      // Địa chỉ trụ sở
+    private String contactName;  // Tên người liên hệ
 
+    /** Constructor mặc định */
     public SupplierDTO() {}
 
+    /**
+     * Constructor có tham số.
+     * @param id    ID nhà cung cấp
+     * @param name  tên
+     * @param phone SĐT
+     * @param email email
+     */
     public SupplierDTO(Integer id, String name, String phone, String email) {
         this.id = id;
         this.name = name;
@@ -40,6 +50,7 @@ public class SupplierDTO {
     public String getContactName() { return contactName; }
     public void setContactName(String contactName) { this.contactName = contactName; }
 
+    /** Trả về tên nhà cung cấp */
     @Override
     public String toString() { return name; }
 }

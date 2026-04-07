@@ -17,12 +17,17 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * OrderPanel – Quản lý đơn hàng.
+ * OrderPanel – Panel quản lý đơn hàng (CRUD).
+ *
+ * Đặc điểm riêng so với panel khác:
+ * - Cột Trạng thái có màu sắc khác nhau tùy giá trị (color-coded status)
+ * - Form có JComboBox cho Customer, Employee, và Status
+ * - Ngày giờ đặt hàng hiển thị dd/MM/yyyy HH:mm
  */
 public class OrderPanel extends JPanel {
 
     private static final Color BG_COLOR      = new Color(240, 240, 240);
-    private static final Color HEADER_COLOR  = new Color(234, 67, 53);
+    private static final Color HEADER_COLOR  = new Color(234, 67, 53);   // Đỏ
     private static final Color BTN_ADD       = new Color(52, 168, 83);
     private static final Color BTN_EDIT      = new Color(251, 188, 4);
     private static final Color BTN_DELETE    = new Color(234, 67, 53);
@@ -30,6 +35,8 @@ public class OrderPanel extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private final OrderController controller = new OrderController();
+
+    /** Định dạng ngày giờ: dd/MM/yyyy HH:mm */
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public OrderPanel() {
@@ -74,11 +81,12 @@ public class OrderPanel extends JPanel {
         table = new JTable(tableModel);
         table.setRowHeight(35);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        table.setSelectionBackground(new Color(255, 210, 210));
+        table.setSelectionBackground(new Color(255, 210, 210));  // Đỏ nhạt khi chọn
         table.setSelectionForeground(Color.BLACK);
         table.setGridColor(new Color(220, 220, 220));
         table.setShowGrid(true);
 
+        // Header renderer
         JTableHeader tableHeader = table.getTableHeader();
         tableHeader.setPreferredSize(new Dimension(0, 40));
         tableHeader.setReorderingAllowed(false);
@@ -97,6 +105,7 @@ public class OrderPanel extends JPanel {
             }
         });
 
+        // Căn giữa cột ID + chiều rộng
         DefaultTableCellRenderer centerR = new DefaultTableCellRenderer();
         centerR.setHorizontalAlignment(SwingConstants.CENTER);
         table.getColumnModel().getColumn(0).setCellRenderer(centerR);
@@ -107,7 +116,7 @@ public class OrderPanel extends JPanel {
         table.getColumnModel().getColumn(4).setPreferredWidth(120);
         table.getColumnModel().getColumn(5).setPreferredWidth(100);
 
-        // Status column renderer – color-coded
+        // ── Custom renderer cho cột Trạng thái – mỗi trạng thái một màu ──
         table.getColumnModel().getColumn(5).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable t, Object val, boolean sel,
@@ -115,12 +124,13 @@ public class OrderPanel extends JPanel {
                 super.getTableCellRendererComponent(t, val, sel, focus, row, col);
                 setHorizontalAlignment(SwingConstants.CENTER);
                 String status = val != null ? val.toString() : "";
+                // Màu sắc theo trạng thái đơn hàng
                 switch (status) {
-                    case "DELIVERED" -> { setForeground(new Color(52, 168, 83)); setFont(getFont().deriveFont(Font.BOLD)); }
-                    case "CANCELLED" -> { setForeground(new Color(234, 67, 53)); setFont(getFont().deriveFont(Font.BOLD)); }
-                    case "SHIPPING"  -> { setForeground(new Color(66, 133, 244)); setFont(getFont().deriveFont(Font.BOLD)); }
-                    case "CONFIRMED" -> { setForeground(new Color(251, 188, 4)); setFont(getFont().deriveFont(Font.BOLD)); }
-                    default          -> { setForeground(new Color(100, 100, 100)); }
+                    case "DELIVERED" -> { setForeground(new Color(52, 168, 83)); setFont(getFont().deriveFont(Font.BOLD)); }   // Xanh lá
+                    case "CANCELLED" -> { setForeground(new Color(234, 67, 53)); setFont(getFont().deriveFont(Font.BOLD)); }   // Đỏ
+                    case "SHIPPING"  -> { setForeground(new Color(66, 133, 244)); setFont(getFont().deriveFont(Font.BOLD)); }  // Xanh dương
+                    case "CONFIRMED" -> { setForeground(new Color(251, 188, 4)); setFont(getFont().deriveFont(Font.BOLD)); }   // Vàng
+                    default          -> { setForeground(new Color(100, 100, 100)); }                                            // Xám (PENDING)
                 }
                 return this;
             }
@@ -152,6 +162,10 @@ public class OrderPanel extends JPanel {
         return button;
     }
 
+    /**
+     * Tải dữ liệu đơn hàng kèm Customer và Employee.
+     * Tổng tiền format VNĐ, trạng thái hiển thị tên enum.
+     */
     public void loadData() {
         SwingWorker<List<Order>, Void> worker = new SwingWorker<>() {
             @Override
@@ -183,16 +197,23 @@ public class OrderPanel extends JPanel {
         worker.execute();
     }
 
+    /**
+     * Dialog thêm đơn hàng mới.
+     * Form có JComboBox cho Customer, Employee, Status.
+     */
     private void showAddDialog() {
         JPanel panel = createFormPanel(null);
         int result = JOptionPane.showConfirmDialog(this, panel, "Thêm đơn hàng",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
             try {
+                @SuppressWarnings("unchecked")
                 JComboBox<Customer> cbCus   = (JComboBox<Customer>) ((JPanel) panel.getComponent(0)).getComponent(1);
+                @SuppressWarnings("unchecked")
                 JComboBox<Employee> cbEmp   = (JComboBox<Employee>) ((JPanel) panel.getComponent(1)).getComponent(1);
                 JTextField tfTotal          = (JTextField) ((JPanel) panel.getComponent(2)).getComponent(1);
                 JTextField tfDiscount       = (JTextField) ((JPanel) panel.getComponent(3)).getComponent(1);
+                @SuppressWarnings("unchecked")
                 JComboBox<String> cbStatus  = (JComboBox<String>) ((JPanel) panel.getComponent(4)).getComponent(1);
                 JTextField tfNote           = (JTextField) ((JPanel) panel.getComponent(5)).getComponent(1);
 
@@ -215,6 +236,9 @@ public class OrderPanel extends JPanel {
         }
     }
 
+    /**
+     * Dialog sửa đơn hàng. Pre-select Customer/Employee/Status.
+     */
     private void showEditDialog() {
         int row = table.getSelectedRow();
         if (row < 0) {
@@ -232,10 +256,13 @@ public class OrderPanel extends JPanel {
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
             try {
+                @SuppressWarnings("unchecked")
                 JComboBox<Customer> cbCus   = (JComboBox<Customer>) ((JPanel) panel.getComponent(0)).getComponent(1);
+                @SuppressWarnings("unchecked")
                 JComboBox<Employee> cbEmp   = (JComboBox<Employee>) ((JPanel) panel.getComponent(1)).getComponent(1);
                 JTextField tfTotal          = (JTextField) ((JPanel) panel.getComponent(2)).getComponent(1);
                 JTextField tfDiscount       = (JTextField) ((JPanel) panel.getComponent(3)).getComponent(1);
+                @SuppressWarnings("unchecked")
                 JComboBox<String> cbStatus  = (JComboBox<String>) ((JPanel) panel.getComponent(4)).getComponent(1);
                 JTextField tfNote           = (JTextField) ((JPanel) panel.getComponent(5)).getComponent(1);
 
@@ -258,6 +285,7 @@ public class OrderPanel extends JPanel {
         }
     }
 
+    /** Xóa đơn hàng đang chọn sau khi xác nhận */
     private void deleteSelected() {
         int row = table.getSelectedRow();
         if (row < 0) {
@@ -276,16 +304,25 @@ public class OrderPanel extends JPanel {
         }
     }
 
+    /**
+     * Tạo form panel cho dialog thêm/sửa đơn hàng.
+     * Gồm: 2 JComboBox (Customer, Employee), 3 TextField (Total, Discount, Note),
+     * 1 JComboBox Status.
+     *
+     * @param values [customerName, employeeName, total, discount, status, note], null nếu thêm mới
+     */
     private JPanel createFormPanel(String[] values) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setPreferredSize(new Dimension(420, 340));
 
+        // JComboBox với item null đầu tiên (= "không chọn")
         JComboBox<Customer> cbCus = new JComboBox<>();
         JComboBox<Employee> cbEmp = new JComboBox<>();
         cbCus.addItem(null);
         cbEmp.addItem(null);
 
+        // Load danh sách Customer và Employee từ CSDL
         List<Customer> customers = controller.getAllCustomers();
         for (Customer c : customers) cbCus.addItem(c);
 
@@ -296,10 +333,11 @@ public class OrderPanel extends JPanel {
         JTextField tfDiscount = new JTextField(values != null ? values[3] : "0", 20);
         JTextField tfNote     = new JTextField(values != null ? values[5] : "", 20);
 
+        // JComboBox trạng thái đơn hàng
         String[] statuses = {"PENDING", "CONFIRMED", "SHIPPING", "DELIVERED", "CANCELLED"};
         JComboBox<String> cbStatus = new JComboBox<>(statuses);
 
-        // Pre-select if editing
+        // Pre-select khi sửa – so sánh theo tên
         if (values != null) {
             for (int i = 0; i < cbCus.getItemCount(); i++) {
                 Customer c = cbCus.getItemAt(i);
@@ -328,6 +366,7 @@ public class OrderPanel extends JPanel {
         return panel;
     }
 
+    /** Tạo dòng trường nhập liệu: [Label | Component] */
     private JPanel createFieldRow(String label, JComponent field) {
         JPanel row = new JPanel(new BorderLayout(10, 5));
         row.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

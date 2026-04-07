@@ -16,12 +16,17 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * ProductPanel – Quản lý sản phẩm với bảng CRUD.
+ * ProductPanel – Panel quản lý sản phẩm (CRUD).
+ *
+ * Khác với CustomerPanel/EmployeePanel:
+ * - Form thêm/sửa có JComboBox cho Category và Supplier (thay vì chỉ TextField)
+ * - Giá hiển thị định dạng tiền VNĐ
+ * - Khi sửa, cần pre-select đúng item trong JComboBox theo tên
  */
 public class ProductPanel extends JPanel {
 
     private static final Color BG_COLOR      = new Color(240, 240, 240);
-    private static final Color HEADER_COLOR  = new Color(66, 133, 244);
+    private static final Color HEADER_COLOR  = new Color(66, 133, 244);   // Xanh dương
     private static final Color BTN_ADD       = new Color(52, 168, 83);
     private static final Color BTN_EDIT      = new Color(251, 188, 4);
     private static final Color BTN_DELETE    = new Color(234, 67, 53);
@@ -79,7 +84,7 @@ public class ProductPanel extends JPanel {
         table.setShowGrid(true);
         table.setIntercellSpacing(new Dimension(0, 1));
 
-        // Header style – custom renderer để hiển thị đúng trên Windows
+        // Header custom renderer
         JTableHeader tableHeader = table.getTableHeader();
         tableHeader.setPreferredSize(new Dimension(0, 40));
         tableHeader.setReorderingAllowed(false);
@@ -98,7 +103,7 @@ public class ProductPanel extends JPanel {
             }
         });
 
-        // Center ID column
+        // Căn giữa cột ID + thiết lập chiều rộng
         DefaultTableCellRenderer centerR = new DefaultTableCellRenderer();
         centerR.setHorizontalAlignment(SwingConstants.CENTER);
         table.getColumnModel().getColumn(0).setCellRenderer(centerR);
@@ -134,6 +139,10 @@ public class ProductPanel extends JPanel {
         return button;
     }
 
+    /**
+     * Tải dữ liệu sản phẩm. Giá format locale VN ("350.000 đ").
+     * Category & Supplier hiển thị tên (JOIN FETCH từ DAO).
+     */
     public void loadData() {
         SwingWorker<List<Product>, Void> worker = new SwingWorker<>() {
             @Override
@@ -164,6 +173,10 @@ public class ProductPanel extends JPanel {
         worker.execute();
     }
 
+    /**
+     * Dialog thêm sản phẩm mới.
+     * Form có JComboBox cho Category (bắt buộc) và Supplier (tùy chọn).
+     */
     private void showAddDialog() {
         JPanel panel = createFormPanel(null);
         int result = JOptionPane.showConfirmDialog(this, panel, "Thêm sản phẩm",
@@ -173,7 +186,9 @@ public class ProductPanel extends JPanel {
                 JTextField tfName  = (JTextField) ((JPanel)panel.getComponent(0)).getComponent(1);
                 JTextField tfDesc  = (JTextField) ((JPanel)panel.getComponent(1)).getComponent(1);
                 JTextField tfPrice = (JTextField) ((JPanel)panel.getComponent(2)).getComponent(1);
+                @SuppressWarnings("unchecked")
                 JComboBox<Category> cbCat = (JComboBox<Category>) ((JPanel)panel.getComponent(3)).getComponent(1);
+                @SuppressWarnings("unchecked")
                 JComboBox<Supplier> cbSup = (JComboBox<Supplier>) ((JPanel)panel.getComponent(4)).getComponent(1);
 
                 String name = tfName.getText().trim();
@@ -196,6 +211,9 @@ public class ProductPanel extends JPanel {
         }
     }
 
+    /**
+     * Dialog sửa sản phẩm. Pre-select Category/Supplier theo tên hiện tại.
+     */
     private void showEditDialog() {
         int row = table.getSelectedRow();
         if (row < 0) {
@@ -205,12 +223,13 @@ public class ProductPanel extends JPanel {
         int id = (int) tableModel.getValueAt(row, 0);
         String name = (String) tableModel.getValueAt(row, 1);
 
+        // Loại bỏ ký tự format giá (" đ", ".", ",")
         JPanel panel = createFormPanel(new String[]{
             name,
-            "",
+            "",  // Mô tả không hiển thị trên bảng
             tableModel.getValueAt(row, 2).toString().replace(" đ", "").replace(".", "").replace(",", ""),
-            (String) tableModel.getValueAt(row, 3),
-            (String) tableModel.getValueAt(row, 4)
+            (String) tableModel.getValueAt(row, 3),  // Tên danh mục để pre-select
+            (String) tableModel.getValueAt(row, 4)   // Tên NCC để pre-select
         });
 
         int result = JOptionPane.showConfirmDialog(this, panel, "Sửa sản phẩm",
@@ -220,7 +239,9 @@ public class ProductPanel extends JPanel {
                 JTextField tfName  = (JTextField) ((JPanel)panel.getComponent(0)).getComponent(1);
                 JTextField tfDesc  = (JTextField) ((JPanel)panel.getComponent(1)).getComponent(1);
                 JTextField tfPrice = (JTextField) ((JPanel)panel.getComponent(2)).getComponent(1);
+                @SuppressWarnings("unchecked")
                 JComboBox<Category> cbCat = (JComboBox<Category>) ((JPanel)panel.getComponent(3)).getComponent(1);
+                @SuppressWarnings("unchecked")
                 JComboBox<Supplier> cbSup = (JComboBox<Supplier>) ((JPanel)panel.getComponent(4)).getComponent(1);
 
                 BigDecimal price = new BigDecimal(tfPrice.getText().trim());
@@ -237,6 +258,7 @@ public class ProductPanel extends JPanel {
         }
     }
 
+    /** Xóa sản phẩm đang chọn */
     private void deleteSelected() {
         int row = table.getSelectedRow();
         if (row < 0) {
@@ -256,6 +278,13 @@ public class ProductPanel extends JPanel {
         }
     }
 
+    /**
+     * Tạo form panel có 3 TextField + 2 JComboBox.
+     * Load danh sách Category và Supplier từ CSDL vào JComboBox.
+     * Nếu đang sửa, pre-select item phù hợp theo tên.
+     *
+     * @param values [name, desc, price, categoryName, supplierName], null nếu thêm mới
+     */
     private JPanel createFormPanel(String[] values) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -265,18 +294,20 @@ public class ProductPanel extends JPanel {
         JTextField tfDesc  = new JTextField(values != null ? values[1] : "", 25);
         JTextField tfPrice = new JTextField(values != null ? values[2] : "", 25);
 
+        // JComboBox cho danh mục và nhà cung cấp
         JComboBox<Category> cbCat = new JComboBox<>();
         JComboBox<Supplier> cbSup = new JComboBox<>();
 
-        // Load categories & suppliers
+        // Load danh mục từ CSDL
         List<Category> categories = controller.getAllCategories();
         for (Category c : categories) cbCat.addItem(c);
 
+        // Load nhà cung cấp từ CSDL (có item null đầu tiên = "không chọn")
         cbSup.addItem(null);
         List<Supplier> suppliers = controller.getAllSuppliers();
         for (Supplier s : suppliers) cbSup.addItem(s);
 
-        // Pre-select if editing
+        // Pre-select item khi sửa – so sánh theo tên
         if (values != null) {
             for (int i = 0; i < cbCat.getItemCount(); i++) {
                 if (cbCat.getItemAt(i).getName().equals(values[3])) {
@@ -302,6 +333,7 @@ public class ProductPanel extends JPanel {
         return panel;
     }
 
+    /** Tạo dòng trường nhập liệu: [Label | Component] */
     private JPanel createFieldRow(String label, JComponent field) {
         JPanel row = new JPanel(new BorderLayout(10, 5));
         row.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

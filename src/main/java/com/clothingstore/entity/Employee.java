@@ -7,41 +7,100 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Employee – Entity đại diện cho bảng "employees" trong cơ sở dữ liệu.
+ *
+ * <p>Lưu trữ thông tin nhân viên làm việc tại cửa hàng quần áo,
+ * bao gồm thông tin cá nhân, chức vụ, lương và các đơn hàng đã xử lý.</p>
+ *
+ * <p><b>Mối quan hệ:</b></p>
+ * <ul>
+ *   <li>1 Employee → N Order (Một-Nhiều): Một nhân viên có thể xử lý nhiều đơn hàng</li>
+ * </ul>
+ *
+ * @author clothing-store
+ * @version 1.0
+ * @see Order
+ */
 @Entity
 @Table(name = "employees")
 public class Employee {
 
+    /** Khóa chính – ID tự động tăng */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /**
+     * Họ và tên nhân viên.
+     * <p>Bắt buộc nhập, tối đa 150 ký tự.</p>
+     */
     @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
 
+    /** Số điện thoại nhân viên */
     @Column(name = "phone", length = 20)
     private String phone;
 
+    /**
+     * Email nhân viên.
+     * <p>{@code unique = true} – đảm bảo mỗi nhân viên có email duy nhất.</p>
+     */
     @Column(name = "email", length = 100, unique = true)
     private String email;
 
+    /**
+     * Chức vụ/vị trí làm việc (VD: "Nhân viên bán hàng", "Quản lý kho", "Trưởng ca").
+     */
     @Column(name = "position", length = 100)
     private String position;
 
+    /**
+     * Mức lương của nhân viên.
+     *
+     * <p>{@code precision = 15, scale = 2} – hỗ trợ số có tối đa 15 chữ số,
+     * trong đó 2 chữ số thập phân. Ví dụ: 12,000,000.00 VNĐ.<br>
+     * Sử dụng {@link BigDecimal} thay vì double/float để đảm bảo độ chính xác
+     * khi tính toán tiền tệ (tránh lỗi làm tròn số thực dấu phẩy động).</p>
+     */
     @Column(name = "salary", precision = 15, scale = 2)
     private BigDecimal salary = BigDecimal.ZERO;
 
+    /**
+     * Ngày bắt đầu làm việc (ngày vào làm).
+     * <p>Sử dụng {@link LocalDate} – chỉ lưu ngày, không lưu giờ.</p>
+     */
     @Column(name = "hire_date")
     private LocalDate hireDate;
 
+    /** Thời điểm tạo bản ghi nhân viên */
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    /**
+     * Danh sách đơn hàng do nhân viên này xử lý (quan hệ Một-Nhiều).
+     *
+     * <p>{@code mappedBy = "employee"} – trường "employee" trong entity Order
+     * là phía sở hữu quan hệ.</p>
+     */
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
 
-    // ── Constructors ──
+    // ══════════════════════════════════════════════════════════════════════════
+    // CONSTRUCTORS
+    // ══════════════════════════════════════════════════════════════════════════
+
+    /** Constructor mặc định – bắt buộc cho Hibernate */
     public Employee() {}
 
+    /**
+     * Constructor có tham số cơ bản.
+     *
+     * @param fullName họ và tên
+     * @param phone    số điện thoại
+     * @param email    email
+     * @param position chức vụ
+     */
     public Employee(String fullName, String phone, String email, String position) {
         this.fullName = fullName;
         this.phone = phone;
@@ -49,7 +108,10 @@ public class Employee {
         this.position = position;
     }
 
-    // ── Getters & Setters ──
+    // ══════════════════════════════════════════════════════════════════════════
+    // GETTERS & SETTERS
+    // ══════════════════════════════════════════════════════════════════════════
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -65,9 +127,11 @@ public class Employee {
     public String getPosition() { return position; }
     public void setPosition(String position) { this.position = position; }
 
+    /** @return mức lương (BigDecimal để đảm bảo chính xác tiền tệ) */
     public BigDecimal getSalary() { return salary; }
     public void setSalary(BigDecimal salary) { this.salary = salary; }
 
+    /** @return ngày vào làm */
     public LocalDate getHireDate() { return hireDate; }
     public void setHireDate(LocalDate hireDate) { this.hireDate = hireDate; }
 
@@ -77,6 +141,9 @@ public class Employee {
     public List<Order> getOrders() { return orders; }
     public void setOrders(List<Order> orders) { this.orders = orders; }
 
+    /**
+     * Trả về họ tên nhân viên – dùng hiển thị trong JComboBox, JTable.
+     */
     @Override
     public String toString() { return fullName; }
 }
