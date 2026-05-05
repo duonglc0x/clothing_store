@@ -54,8 +54,8 @@ public class HibernateUtil {
     /**
      * Lấy thể hiện duy nhất của SessionFactory.
      *
-     * <p>Phương thức này được gọi bởi tất cả các lớp DAO khi cần mở một {@link org.hibernate.Session}
-     * mới để thực hiện truy vấn hoặc cập nhật dữ liệu.</p>
+     * Phương thức này được gọi bởi tất cả các lớp DAO khi cần mở một {@link org.hibernate.Session}
+     * mới để thực hiện truy vấn hoặc cập nhật dữ liệu.
      *
      * @return SessionFactory duy nhất của ứng dụng
      */
@@ -66,9 +66,9 @@ public class HibernateUtil {
     /**
      * Đóng SessionFactory và giải phóng tất cả tài nguyên liên quan.
      *
-     * <p>Phương thức này được gọi khi ứng dụng thoát (thông qua Shutdown Hook trong MainApp)
+     * Phương thức này được gọi khi ứng dụng thoát (thông qua Shutdown Hook trong MainApp)
      * để đóng tất cả connection trong pool, giải phóng bộ nhớ, và đảm bảo
-     * không có kết nối MySQL nào bị rò rỉ (connection leak).</p>
+     * không có kết nối MySQL nào bị rò rỉ (connection leak).
      */
     public static void shutdown() {
         // Kiểm tra null trước khi đóng để tránh NullPointerException
