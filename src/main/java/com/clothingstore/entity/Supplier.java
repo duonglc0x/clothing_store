@@ -8,13 +8,9 @@ import java.util.List;
 /**
  * Supplier – Entity đại diện cho bảng "suppliers" trong cơ sở dữ liệu.
  *
- * <p>Lưu trữ thông tin các nhà cung cấp hàng hóa (quần áo, phụ kiện) cho cửa hàng.
- * Mỗi nhà cung cấp có thể cung cấp nhiều sản phẩm khác nhau.</p>
- *
- * <p><b>Mối quan hệ:</b></p>
- * <ul>
- *   <li>1 Supplier → N Product (Một-Nhiều): Một nhà cung cấp cung cấp nhiều sản phẩm</li>
- * </ul>
+ * Lưu trữ thông tin các nhà cung cấp hàng hóa (quần áo, phụ kiện) cho cửa hàng.
+ * Mỗi nhà cung cấp có thể cung cấp nhiều sản phẩm khác nhau.
+
  *
  * @author clothing-store
  * @version 1.0
@@ -31,7 +27,7 @@ public class Supplier {
 
     /**
      * Tên nhà cung cấp (tên công ty hoặc cá nhân).
-     * <p>Bắt buộc nhập, tối đa 150 ký tự.</p>
+     * Bắt buộc nhập, tối đa 150 ký tự.
      */
     @Column(name = "name", nullable = false, length = 150)
     private String name;
@@ -46,14 +42,12 @@ public class Supplier {
 
     /**
      * Địa chỉ trụ sở/kho hàng của nhà cung cấp.
-     * <p>Sử dụng kiểu TEXT để hỗ trợ địa chỉ chi tiết.</p>
      */
     @Column(name = "address", columnDefinition = "TEXT")
     private String address;
 
     /**
      * Tên người liên hệ trực tiếp tại nhà cung cấp.
-     * <p>Ví dụ: "Anh Minh – Phòng kinh doanh"</p>
      */
     @Column(name = "contact_name", length = 100)
     private String contactName;
@@ -64,9 +58,6 @@ public class Supplier {
 
     /**
      * Danh sách sản phẩm do nhà cung cấp này cung cấp (quan hệ Một-Nhiều).
-     *
-     * <p>{@code mappedBy = "supplier"} – trường "supplier" trong entity Product
-     * là phía sở hữu quan hệ.</p>
      */
     @OneToMany(mappedBy = "supplier", fetch = FetchType.LAZY)
     private List<Product> products = new ArrayList<>();

@@ -7,15 +7,7 @@ import java.util.List;
 
 /**
  * Customer – Entity đại diện cho bảng "customers" trong cơ sở dữ liệu.
- *
- * <p>Lớp này ánh xạ đến bảng {@code customers} trong MySQL, lưu trữ thông tin
- * khách hàng của cửa hàng quần áo.</p>
- *
- * <p><b>Mối quan hệ:</b></p>
- * <ul>
- *   <li>1 Customer → N Order (Một-Nhiều): Một khách hàng có thể đặt nhiều đơn hàng</li>
- * </ul>
- *
+
  * @author clothing-store
  * @version 1.0
  * @see Order
@@ -33,15 +25,15 @@ public class Customer {
 
     /**
      * Họ và tên đầy đủ của khách hàng.
-     * <p>Bắt buộc nhập (nullable = false), tối đa 150 ký tự.</p>
+     * Bắt buộc nhập (nullable = false), tối đa 150 ký tự.
      */
     @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
 
     /**
      * Số điện thoại khách hàng.
-     * <p>{@code unique = true} – mỗi số điện thoại phải là duy nhất trong hệ thống,
-     * dùng để định danh khách hàng.</p>
+     * {@code unique = true} – mỗi số điện thoại phải là duy nhất trong hệ thống,
+     * dùng để định danh khách hàng.
      */
     @Column(name = "phone", length = 20, unique = true)
     private String phone;
@@ -54,7 +46,7 @@ public class Customer {
 
     /**
      * Địa chỉ giao hàng/liên hệ của khách hàng.
-     * <p>Sử dụng kiểu TEXT để hỗ trợ địa chỉ dài.</p>
+     * Sử dụng kiểu TEXT để hỗ trợ địa chỉ dài.
      */
     @Column(name = "address", columnDefinition = "TEXT")
     private String address;
@@ -68,8 +60,8 @@ public class Customer {
     /**
      * Danh sách đơn hàng của khách hàng này (quan hệ Một-Nhiều).
      *
-     * <p>{@code mappedBy = "customer"} – phía sở hữu là trường "customer" trong entity Order.<br>
-     * {@code FetchType.LAZY} – chỉ tải danh sách đơn hàng khi cần truy cập.</p>
+     * {@code mappedBy = "customer"} – phía sở hữu là trường "customer" trong entity Order.<br>
+     * {@code FetchType.LAZY} – chỉ tải danh sách đơn hàng khi cần truy cập.
      */
     @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();

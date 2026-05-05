@@ -8,18 +8,6 @@ import java.util.List;
 /**
  * Category – Entity đại diện cho bảng "categories" trong cơ sở dữ liệu.
  *
- * <p>Lớp này ánh xạ (mapping) đến bảng {@code categories} trong MySQL thông qua
- * JPA/Hibernate annotations. Mỗi đối tượng Category tương ứng với MỘT dòng (row)
- * trong bảng categories.</p>
- *
- * <p><b>Vai trò trong hệ thống:</b> Danh mục sản phẩm (ví dụ: Áo, Quần, Váy, Phụ kiện...)
- * dùng để phân loại các sản phẩm quần áo trong cửa hàng.</p>
- *
- * <p><b>Mối quan hệ:</b></p>
- * <ul>
- *   <li>1 Category → N Product (Một-Nhiều): Một danh mục chứa nhiều sản phẩm</li>
- * </ul>
- *
  * @author clothing-store
  * @version 1.0
  * @see Product
@@ -30,10 +18,8 @@ public class Category {
 
     /**
      * Khóa chính (Primary Key) – ID tự động tăng của danh mục.
-     *
-     * <p>{@code @Id} – đánh dấu đây là khóa chính.<br>
      * {@code @GeneratedValue(strategy = GenerationType.IDENTITY)} – MySQL tự động tạo giá trị
-     * ID mới (AUTO_INCREMENT) khi insert dòng mới.</p>
+     * ID mới (AUTO_INCREMENT) khi insert dòng mới.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,18 +27,12 @@ public class Category {
 
     /**
      * Tên danh mục (VD: "Áo sơ mi", "Quần jean", "Váy đầm").
-     *
-     * <p>{@code nullable = false} – cột này KHÔNG được NULL trong CSDL.<br>
-     * {@code length = 100} – độ dài tối đa 100 ký tự VARCHAR(100).</p>
      */
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
     /**
      * Mô tả chi tiết về danh mục (tùy chọn).
-     *
-     * <p>{@code columnDefinition = "TEXT"} – sử dụng kiểu TEXT trong MySQL
-     * để lưu trữ mô tả dài không giới hạn độ dài.</p>
      */
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
@@ -66,10 +46,10 @@ public class Category {
     /**
      * Danh sách sản phẩm thuộc danh mục này (quan hệ Một-Nhiều / One-To-Many).
      *
-     * <p>{@code mappedBy = "category"} – trường "category" trong entity Product
-     * là phía sở hữu (owning side) của quan hệ này.<br>
+     * {@code mappedBy = "category"} – trường "category" trong entity Product
+     * là phía sở hữu (owning side) của quan hệ này.
      * {@code FetchType.LAZY} – danh sách sản phẩm CHỈ được tải khi truy cập trực tiếp
-     * (không tải sẵn cùng Category → tối ưu hiệu suất).</p>
+     * (không tải sẵn cùng Category → tối ưu hiệu suất).
      */
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private List<Product> products = new ArrayList<>();

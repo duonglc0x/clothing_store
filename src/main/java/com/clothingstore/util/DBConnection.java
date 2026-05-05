@@ -40,13 +40,6 @@ public class DBConnection {
      * <p>Mỗi lần gọi phương thức này sẽ tạo một kết nối MỚI. Người gọi có trách nhiệm
      * đóng kết nối sau khi sử dụng xong (nên dùng try-with-resources).</p>
      *
-     * <p>Ví dụ sử dụng:</p>
-     * <pre>{@code
-     * try (Connection conn = DBConnection.getConnection()) {
-     *     // Thực hiện truy vấn SQL tại đây
-     * }
-     * }</pre>
-     *
      * @return đối tượng {@link Connection} đại diện cho kết nối đến MySQL
      * @throws SQLException nếu không thể kết nối (sai URL, sai mật khẩu,
      *         MySQL chưa chạy, database không tồn tại, v.v.)

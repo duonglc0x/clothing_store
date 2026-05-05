@@ -9,17 +9,6 @@ import java.util.List;
 /**
  * Product – Entity đại diện cho bảng "products" trong cơ sở dữ liệu.
  *
- * <p>Đây là entity trung tâm của hệ thống, lưu trữ thông tin sản phẩm quần áo
- * bao gồm: tên, mô tả, giá bán, hình ảnh, và liên kết với danh mục + nhà cung cấp.</p>
- *
- * <p><b>Mối quan hệ:</b></p>
- * <ul>
- *   <li>N Product → 1 Category (Nhiều-Một): Mỗi sản phẩm thuộc một danh mục</li>
- *   <li>N Product → 1 Supplier (Nhiều-Một): Mỗi sản phẩm do một nhà cung cấp cung cấp</li>
- *   <li>1 Product → N Inventory (Một-Nhiều): Mỗi sản phẩm có nhiều bản ghi tồn kho (theo size/color)</li>
- *   <li>1 Product → N OrderDetail (Một-Nhiều): Mỗi sản phẩm có thể xuất hiện trong nhiều chi tiết đơn hàng</li>
- * </ul>
- *
  * @author clothing-store
  * @version 1.0
  * @see Category
@@ -38,14 +27,12 @@ public class Product {
 
     /**
      * Tên sản phẩm (VD: "Áo sơ mi trắng tay dài", "Quần jean slim fit").
-     * <p>Bắt buộc nhập, tối đa 200 ký tự.</p>
      */
     @Column(name = "name", nullable = false, length = 200)
     private String name;
 
     /**
      * Mô tả chi tiết sản phẩm (chất liệu, phong cách, hướng dẫn giặt...).
-     * <p>Kiểu TEXT – không giới hạn độ dài.</p>
      */
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
@@ -53,15 +40,15 @@ public class Product {
     /**
      * Giá bán sản phẩm (VNĐ).
      *
-     * <p>Sử dụng {@link BigDecimal} với precision=15, scale=2 để đảm bảo
-     * tính chính xác khi xử lý tiền tệ. Ví dụ: 350,000.00</p>
+     * Sử dụng {@link BigDecimal} với precision=15, scale=2 để đảm bảo
+     * tính chính xác khi xử lý tiền tệ. Ví dụ: 350,000.00
      */
     @Column(name = "price", nullable = false, precision = 15, scale = 2)
     private BigDecimal price = BigDecimal.ZERO;
 
     /**
      * URL hình ảnh sản phẩm (tùy chọn).
-     * <p>Đường dẫn tương đối hoặc URL tuyệt đối đến ảnh sản phẩm.</p>
+     * Đường dẫn tương đối hoặc URL tuyệt đối đến ảnh sản phẩm.
      */
     @Column(name = "image_url", length = 500)
     private String imageUrl;
@@ -85,8 +72,6 @@ public class Product {
 
     /**
      * Nhà cung cấp sản phẩm (quan hệ Nhiều-Một, tùy chọn).
-     *
-     * <p>Khác với category, supplier có thể NULL (sản phẩm chưa có nhà cung cấp).</p>
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id")
@@ -95,17 +80,17 @@ public class Product {
     /**
      * Danh sách tồn kho (theo kích cỡ và màu sắc) – quan hệ Một-Nhiều.
      *
-     * <p>{@code cascade = CascadeType.ALL} – khi thêm/sửa/xóa sản phẩm,
+     * {@code cascade = CascadeType.ALL} – khi thêm/sửa/xóa sản phẩm,
      * các bản ghi Inventory liên quan cũng bị ảnh hưởng tương ứng.<br>
      * {@code orphanRemoval = true} – khi bản ghi Inventory bị loại khỏi danh sách,
-     * nó sẽ tự động bị xóa khỏi CSDL.</p>
+     * nó sẽ tự động bị xóa khỏi CSDL.
      */
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Inventory> inventories = new ArrayList<>();
 
     /**
      * Danh sách chi tiết đơn hàng chứa sản phẩm này (quan hệ Một-Nhiều).
-     * <p>Chỉ đọc (không cascade) – việc quản lý OrderDetail do Order đảm nhiệm.</p>
+     * Chỉ đọc (không cascade) – việc quản lý OrderDetail do Order đảm nhiệm.
      */
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails = new ArrayList<>();

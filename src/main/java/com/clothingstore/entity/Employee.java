@@ -10,13 +10,6 @@ import java.util.List;
 /**
  * Employee – Entity đại diện cho bảng "employees" trong cơ sở dữ liệu.
  *
- * <p>Lưu trữ thông tin nhân viên làm việc tại cửa hàng quần áo,
- * bao gồm thông tin cá nhân, chức vụ, lương và các đơn hàng đã xử lý.</p>
- *
- * <p><b>Mối quan hệ:</b></p>
- * <ul>
- *   <li>1 Employee → N Order (Một-Nhiều): Một nhân viên có thể xử lý nhiều đơn hàng</li>
- * </ul>
  *
  * @author clothing-store
  * @version 1.0
@@ -58,17 +51,17 @@ public class Employee {
     /**
      * Mức lương của nhân viên.
      *
-     * <p>{@code precision = 15, scale = 2} – hỗ trợ số có tối đa 15 chữ số,
+     * {@code precision = 15, scale = 2} – hỗ trợ số có tối đa 15 chữ số,
      * trong đó 2 chữ số thập phân. Ví dụ: 12,000,000.00 VNĐ.<br>
      * Sử dụng {@link BigDecimal} thay vì double/float để đảm bảo độ chính xác
-     * khi tính toán tiền tệ (tránh lỗi làm tròn số thực dấu phẩy động).</p>
+     * khi tính toán tiền tệ (tránh lỗi làm tròn số thực dấu phẩy động).
      */
     @Column(name = "salary", precision = 15, scale = 2)
     private BigDecimal salary = BigDecimal.ZERO;
 
     /**
      * Ngày bắt đầu làm việc (ngày vào làm).
-     * <p>Sử dụng {@link LocalDate} – chỉ lưu ngày, không lưu giờ.</p>
+     * Sử dụng {@link LocalDate} – chỉ lưu ngày, không lưu giờ.
      */
     @Column(name = "hire_date")
     private LocalDate hireDate;
@@ -80,8 +73,8 @@ public class Employee {
     /**
      * Danh sách đơn hàng do nhân viên này xử lý (quan hệ Một-Nhiều).
      *
-     * <p>{@code mappedBy = "employee"} – trường "employee" trong entity Order
-     * là phía sở hữu quan hệ.</p>
+     * {@code mappedBy = "employee"} – trường "employee" trong entity Order
+     * là phía sở hữu quan hệ.
      */
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
